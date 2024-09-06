@@ -59,7 +59,6 @@ function ScheduleSessionForm({ availability, sessions: initialSessions }) {
       ));
     } catch (error) {
       console.error("Error scheduling session:", error.response ? error.response.data : error.message);
-      alert("Failed to schedule the session. Please try again.");
     }
   };
 
@@ -70,7 +69,6 @@ function ScheduleSessionForm({ availability, sessions: initialSessions }) {
       setSessions(sessions.filter(session => session.sessionId !== sessionId)); // Remove session from the list
     } catch (error) {
       console.error("Error deleting session:", error);
-      alert("Failed to delete the session. Please try again.");
     }
   };
 

@@ -103,17 +103,26 @@ router.put("/reschedule/:sessionId", async (req, res) => {
 // Cancel a session
 router.delete("/cancel/:sessionId", async (req, res) => {
   try {
+    // Find and delete the session
     const session = await Session.findOneAndDelete({
       sessionId: req.params.sessionId,
     });
     if (!session) {
       return res.status(404).json({ message: "Session not found" });
     }
-    res.json({ message: "Session cancelled" });
+
+    // Update the availability slot to be available again
+    await Availability.findOneAndUpdate(
+      { user: session.createdBy, start: session.scheduledTime, duration: session.duration },
+      { booked: false }
+    );
+
+    res.json({ message: "Session cancelled and availability updated" });
   } catch (error) {
     console.error("Error cancelling session:", error);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 });
+
 
 module.exports = router;
