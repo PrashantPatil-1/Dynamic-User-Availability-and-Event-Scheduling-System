@@ -95,18 +95,3 @@ The Dynamic User Availability and Event Scheduling System is a full-stack web ap
 
 - **View Availability:** Navigate to the Admin Dashboard to select a user and view their availability.
 - **Schedule Sessions:** Choose available slots to schedule one-on-one or multi-participant sessions.
-
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## Acknowledgements
-
-- **React:** A JavaScript library for building user interfaces.
-- **Express:** A web application framework for Node.js.
-- **MongoDB:** A NoSQL database used for data storage.
-- **Netlify:** A platform for deploying static sites.
-- **Render:** A platform for deploying backend applications.
-
----
