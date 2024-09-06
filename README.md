@@ -51,7 +51,7 @@ The Dynamic User Availability and Event Scheduling System is a full-stack web ap
    npm run dev
    ```
 
-   The frontend will be available at `http://localhost:3000`.
+   The frontend will be available at `http://localhost:5173`.
 
 ### Backend
 
@@ -85,25 +85,6 @@ The Dynamic User Availability and Event Scheduling System is a full-stack web ap
    The backend will be available at `http://localhost:3000`.
 
 
-### Frontend 
-
-1. **Navigate to the frontend Directory:**
-
-   ```bash
-   cd your-repo/frontend 
-   ```
-   
-2. **Install Dependencies:**
-
-   ```bash
-   npm install
-   ```
-
- 3. **Start the Development Server:**
-
-   ```bash
-   npm run dev
-   ```
    
 ## Usage
 
