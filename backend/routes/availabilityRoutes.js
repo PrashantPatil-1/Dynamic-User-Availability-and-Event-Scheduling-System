@@ -1,4 +1,3 @@
-// backend/routes/availabilityRoutes.js
 const express = require("express");
 const router = express.Router();
 const Availability = require("../models/Availability");
@@ -7,11 +6,7 @@ const Availability = require("../models/Availability");
 router.post("/", async (req, res) => {
   const { user, start, end, duration } = req.body;
   try {
-    const existingAvailability = await Availability.findOne({
-      user,
-      start,
-      end,
-    });
+    const existingAvailability = await Availability.findOne({ user, start, end });
 
     if (existingAvailability) {
       existingAvailability.duration = duration;
@@ -22,6 +17,33 @@ router.post("/", async (req, res) => {
       await availability.save();
       return res.json(availability);
     }
+  } catch (error) {
+    res.status(500).send("Server error");
+  }
+});
+
+// Route to update availability
+router.put("/:slotId", async (req, res) => {
+  const { slotId } = req.params;
+  const { start, end, duration } = req.body;
+  try {
+    const updatedAvailability = await Availability.findByIdAndUpdate(
+      slotId,
+      { start, end, duration },
+      { new: true }
+    );
+    res.json(updatedAvailability);
+  } catch (error) {
+    res.status(500).send("Server error");
+  }
+});
+
+// Route to delete availability
+router.delete("/:slotId", async (req, res) => {
+  const { slotId } = req.params;
+  try {
+    await Availability.findByIdAndDelete(slotId);
+    res.status(204).send();
   } catch (error) {
     res.status(500).send("Server error");
   }

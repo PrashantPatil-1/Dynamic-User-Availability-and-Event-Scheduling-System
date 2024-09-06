@@ -6,7 +6,7 @@ function ScheduleSessionForm({ availability, sessions: initialSessions }) {
   const [type, setType] = useState("One-on-One");
   const [attendees, setAttendees] = useState([{ name: "", email: "" }]);
   const [notificationType, setNotificationType] = useState("Email");
-  const [sessions, setSessions] = useState(initialSessions); // Use local state to manage sessions
+  const [sessions, setSessions] = useState(initialSessions);
 
   const handleAttendeeChange = (index, field, value) => {
     const newAttendees = [...attendees];
@@ -52,6 +52,11 @@ function ScheduleSessionForm({ availability, sessions: initialSessions }) {
       console.log("Session scheduled successfully:", response.data);
       alert("Session scheduled successfully!");
       setSessions([...sessions, response.data]); // Add new session to the list
+
+      // Update availability slot status
+      setAvailability(prev => prev.map(slot =>
+        slot.start === selectedSlot.start ? { ...slot, booked: true } : slot
+      ));
     } catch (error) {
       console.error("Error scheduling session:", error.response ? error.response.data : error.message);
       alert("Failed to schedule the session. Please try again.");

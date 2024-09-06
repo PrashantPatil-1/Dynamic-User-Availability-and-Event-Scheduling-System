@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import 'bootstrap/dist/css/bootstrap.min.css';
+import "bootstrap/dist/css/bootstrap.min.css";
 
 function Home() {
   const [user, setUser] = useState(null);
@@ -8,6 +8,7 @@ function Home() {
   const [date, setDate] = useState(new Date());
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
+  const [selectedSlot, setSelectedSlot] = useState(null);
 
   useEffect(() => {
     if (user) {
@@ -17,7 +18,10 @@ function Home() {
 
   const loginUser = async (email) => {
     try {
-      const response = await axios.post("http://localhost:3000/api/users/login", { email });
+      const response = await axios.post(
+        "http://localhost:3000/api/users/login",
+        { email }
+      );
       setUser(response.data);
     } catch (error) {
       console.error("Error logging in:", error);
@@ -26,7 +30,9 @@ function Home() {
 
   const fetchAvailability = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/api/availability/${user._id}`);
+      const response = await axios.get(
+        `http://localhost:3000/api/availability/${user._id}`
+      );
       setAvailability(response.data);
     } catch (error) {
       console.error("Error fetching availability:", error);
@@ -40,17 +46,55 @@ function Home() {
     }
 
     try {
-      const response = await axios.post("http://localhost:3000/api/availability", {
-        user: user._id,
-        start: `${date.toISOString().split('T')[0]}T${startTime}:00`,
-        end: `${date.toISOString().split('T')[0]}T${endTime}:00`,
-        duration: calculateDuration(startTime, endTime),
-      });
-      setAvailability(prev => [...prev, response.data]);
+      const response = await axios.post(
+        "http://localhost:3000/api/availability",
+        {
+          user: user._id,
+          start: `${date.toISOString().split("T")[0]}T${startTime}:00`,
+          end: `${date.toISOString().split("T")[0]}T${endTime}:00`,
+          duration: calculateDuration(startTime, endTime),
+        }
+      );
+      setAvailability((prev) => [...prev, response.data]);
       setStartTime("");
       setEndTime("");
     } catch (error) {
       console.error("Error saving availability:", error);
+    }
+  };
+
+  const updateAvailability = async (slotId) => {
+    if (!date || !startTime || !endTime) {
+      alert("Please select a date, start time, and end time before updating.");
+      return;
+    }
+
+    try {
+      const response = await axios.put(
+        `http://localhost:3000/api/availability/${slotId}`,
+        {
+          start: `${date.toISOString().split("T")[0]}T${startTime}:00`,
+          end: `${date.toISOString().split("T")[0]}T${endTime}:00`,
+          duration: calculateDuration(startTime, endTime),
+        }
+      );
+      setAvailability((prev) =>
+        prev.map((slot) => (slot._id === slotId ? response.data : slot))
+      );
+      setStartTime("");
+      setEndTime("");
+      setSelectedSlot(null);
+    } catch (error) {
+      console.error("Error updating availability:", error);
+    }
+  };
+
+  const deleteAvailability = async (slotId) => {
+    try {
+      await axios.delete(`http://localhost:3000/api/availability/${slotId}`);
+      setAvailability((prev) => prev.filter((slot) => slot._id !== slotId));
+    } catch (error) {
+      console.error("Error deleting availability:", error);
     }
   };
 
@@ -61,67 +105,138 @@ function Home() {
   };
 
   return (
-    <div style={{ maxWidth: '900px', margin: '20px auto', padding: '20px', textAlign: 'center' }}>
+    <div
+      style={{
+        maxWidth: "900px",
+        margin: "20px auto",
+        padding: "20px",
+        textAlign: "center",
+      }}
+    >
       <h1>Availability Scheduler</h1>
-      <div style={{ padding: '20px', border: '1px solid #ddd', borderRadius: '8px', background: '#fff' }}>
-        <div style={{ marginBottom: '20px' }}>
+      <div
+        style={{
+          padding: "20px",
+          border: "1px solid #ddd",
+          borderRadius: "8px",
+          background: "#fff",
+        }}
+      >
+        <div style={{ marginBottom: "20px" }}>
           <label htmlFor="email">Enter your email:</label>
           <input
             type="email"
             id="email"
             placeholder="Enter your email"
-            style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+            style={{ width: "100%", padding: "8px", boxSizing: "border-box" }}
             onBlur={(e) => loginUser(e.target.value)}
           />
         </div>
         {user && (
           <div>
             <h2>Set Availability</h2>
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: "20px" }}>
               <label htmlFor="date">Select Date:</label>
               <input
                 type="date"
                 id="date"
-                value={date.toISOString().split('T')[0]}
+                value={date.toISOString().split("T")[0]}
                 onChange={(e) => setDate(new Date(e.target.value))}
-                style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+                style={{
+                  width: "100%",
+                  padding: "8px",
+                  boxSizing: "border-box",
+                }}
               />
             </div>
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: "20px" }}>
               <label htmlFor="startTime">Start Time:</label>
               <input
                 type="time"
                 id="startTime"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+                style={{
+                  width: "100%",
+                  padding: "8px",
+                  boxSizing: "border-box",
+                }}
               />
             </div>
-            <div style={{ marginBottom: '20px' }}>
+            <div style={{ marginBottom: "20px" }}>
               <label htmlFor="endTime">End Time:</label>
               <input
                 type="time"
                 id="endTime"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
-                style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+                style={{
+                  width: "100%",
+                  padding: "8px",
+                  boxSizing: "border-box",
+                }}
               />
             </div>
-            <button onClick={saveAvailability} style={{ padding: '10px 20px', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '4px' }}>
-              Save Availability
+            <button
+              onClick={
+                selectedSlot
+                  ? () => updateAvailability(selectedSlot._id)
+                  : saveAvailability
+              }
+              style={{
+                padding: "10px 20px",
+                backgroundColor: "#007bff",
+                color: "#fff",
+                border: "none",
+                borderRadius: "4px",
+              }}
+            >
+              {selectedSlot ? "Update Availability" : "Save Availability"}
             </button>
-            <div style={{ marginTop: '20px' }}>
+            <div style={{ marginTop: "20px" }}>
               <h3>Existing Availability</h3>
               <ul>
                 {availability && availability.length > 0 ? (
                   availability.map((slot, index) => (
                     <li key={index}>
-                      {new Date(slot.start).toLocaleString()} - {new Date(slot.end).toLocaleString()} ({slot.duration} minutes)
+                      {new Date(slot.start).toLocaleString()} -{" "}
+                      {new Date(slot.end).toLocaleString()} ({slot.duration}{" "}
+                      minutes)
                       {slot.booked ? (
-                        <span style={{ color: 'red', marginLeft: '10px' }}>Booked for session</span>
+                        <span style={{ color: "red", marginLeft: "10px" }}>
+                          Booked{" "}
+                        </span>
                       ) : (
-                        <span style={{ color: 'green', marginLeft: '10px' }}>Available</span>
+                        <span style={{ color: "green", marginLeft: "10px" }}>
+                          Available
+                        </span>
                       )}
+                      <button
+                        onClick={() => {
+                          setSelectedSlot(slot);
+                          setStartTime(
+                            new Date(slot.start)
+                              .toISOString()
+                              .split("T")[1]
+                              .substring(0, 5)
+                          );
+                          setEndTime(
+                            new Date(slot.end)
+                              .toISOString()
+                              .split("T")[1]
+                              .substring(0, 5)
+                          );
+                        }}
+                        style={{ marginLeft: "10px" }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => deleteAvailability(slot._id)}
+                        style={{ marginLeft: "10px", color: "red" }}
+                      >
+                        Delete
+                      </button>
                     </li>
                   ))
                 ) : (

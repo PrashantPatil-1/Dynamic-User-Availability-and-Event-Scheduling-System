@@ -2,6 +2,7 @@
 const express = require("express");
 const router = express.Router();
 const Session = require("../models/Session");
+const Availability = require("../models/Availability");
 
 // Create a new session
 router.post("/", async (req, res) => {
@@ -38,6 +39,7 @@ router.post("/", async (req, res) => {
         .json({ message: `Invalid email format: ${invalidEmails.join(", ")}` });
     }
 
+    // Create and save the session
     const session = new Session({
       sessionId,
       participants,
@@ -49,6 +51,13 @@ router.post("/", async (req, res) => {
     });
 
     await session.save();
+
+    // Update availability to booked
+    await Availability.findOneAndUpdate(
+      { user: createdBy, start: new Date(scheduledTime), duration },
+      { booked: true }
+    );
+
     res.status(201).json(session);
   } catch (error) {
     console.error("Error creating session:", error);
