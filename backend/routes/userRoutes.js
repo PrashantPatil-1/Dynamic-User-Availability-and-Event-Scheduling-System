@@ -1,7 +1,8 @@
 //backend/routes/userRoutes.js
-const express = require("express");
+import express from 'express';
+import User from '../models/User.js';
+
 const router = express.Router();
-const User = require("../models/User");
 
 // Route to login or register a user based on email
 router.post("/login", async (req, res) => {
@@ -28,4 +29,4 @@ router.get("/", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

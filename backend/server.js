@@ -1,7 +1,10 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-require('dotenv').config();
+// backend/server.js
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import dotenv from 'dotenv';
+
+dotenv.config();
 
 const app = express();
 app.use(cors());
@@ -18,9 +21,13 @@ mongoose
   .catch((err) => console.error('MongoDB connection error:', err));
 
 // Define routes
-app.use('/api/users', require('./routes/userRoutes'));
-app.use('/api/availability', require('./routes/availabilityRoutes'));
-app.use('/api/sessions', require('./routes/sessionRoutes'));
+import userRoutes from './routes/userRoutes.js';
+import availabilityRoutes from './routes/availabilityRoutes.js';
+import sessionRoutes from './routes/sessionRoutes.js';
+
+app.use('/api/users', userRoutes);
+app.use('/api/availability', availabilityRoutes);
+app.use('/api/sessions', sessionRoutes);
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

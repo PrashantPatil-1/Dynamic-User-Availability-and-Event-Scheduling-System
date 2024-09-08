@@ -1,6 +1,8 @@
-const express = require("express");
+// backend/routes/availabilityRoutes.js
+import express from 'express';
+import Availability from '../models/Availability.js';
+
 const router = express.Router();
-const Availability = require("../models/Availability");
 
 // Route to add availability or update existing availability
 router.post("/", async (req, res) => {
@@ -59,4 +61,4 @@ router.get("/:userId", async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;

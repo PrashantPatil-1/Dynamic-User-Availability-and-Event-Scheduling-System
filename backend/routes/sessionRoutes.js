@@ -1,8 +1,9 @@
 // backend/routes/sessionRoutes.js
-const express = require("express");
+import express from 'express';
+import Session from '../models/Session.js';
+import Availability from '../models/Availability.js';
+
 const router = express.Router();
-const Session = require("../models/Session");
-const Availability = require("../models/Availability");
 
 // Create a new session
 router.post("/", async (req, res) => {
@@ -17,29 +18,17 @@ router.post("/", async (req, res) => {
       notifications,
     } = req.body;
 
-    // Check required fields
-    if (
-      !sessionId ||
-      !participants.length ||
-      !scheduledTime ||
-      !createdBy ||
-      !duration ||
-      !sessionType
-    ) {
+    if (!sessionId || !participants.length || !scheduledTime || !createdBy || !duration || !sessionType) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // Ensure participants are valid emails
     const invalidEmails = participants.filter(
       (email) => !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
     );
     if (invalidEmails.length > 0) {
-      return res
-        .status(400)
-        .json({ message: `Invalid email format: ${invalidEmails.join(", ")}` });
+      return res.status(400).json({ message: `Invalid email format: ${invalidEmails.join(", ")}` });
     }
 
-    // Create and save the session
     const session = new Session({
       sessionId,
       participants,
@@ -52,7 +41,6 @@ router.post("/", async (req, res) => {
 
     await session.save();
 
-    // Update availability to booked
     await Availability.findOneAndUpdate(
       { user: createdBy, start: new Date(scheduledTime), duration },
       { booked: true }
@@ -65,7 +53,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-// backend/routes/sessionRoutes.js
 router.get("/:userId", async (req, res) => {
   try {
     const sessions = await Session.find({
@@ -103,7 +90,6 @@ router.put("/reschedule/:sessionId", async (req, res) => {
 // Cancel a session
 router.delete("/cancel/:sessionId", async (req, res) => {
   try {
-    // Find and delete the session
     const session = await Session.findOneAndDelete({
       sessionId: req.params.sessionId,
     });
@@ -111,7 +97,6 @@ router.delete("/cancel/:sessionId", async (req, res) => {
       return res.status(404).json({ message: "Session not found" });
     }
 
-    // Update the availability slot to be available again
     await Availability.findOneAndUpdate(
       { user: session.createdBy, start: session.scheduledTime, duration: session.duration },
       { booked: false }
@@ -124,5 +109,4 @@ router.delete("/cancel/:sessionId", async (req, res) => {
   }
 });
 
-
-module.exports = router;
+export default router;
