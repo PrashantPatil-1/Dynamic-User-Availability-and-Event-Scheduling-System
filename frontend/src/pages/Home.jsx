@@ -65,7 +65,7 @@ function Home() {
 
   const updateAvailability = async (slotId, booked) => {
     if (booked) {
-      alert("Call to admin for modify.");
+      alert("You can not update any booked slot, Call to admin for any changes.");
       return;
     }
 
@@ -96,8 +96,8 @@ function Home() {
 
   const deleteAvailability = async (slotId, booked) => {
     if (booked) {
-      alert("Call to admin for modify.");
-      return;
+      alert("You can not delete any booked slot, Call to admin for any changes.");
+      return;       
     }
 
     try {
@@ -111,7 +111,7 @@ function Home() {
   const calculateDuration = (start, end) => {
     const startTime = new Date(`1970-01-01T${start}:00`);
     const endTime = new Date(`1970-01-01T${end}:00`);
-    return Math.round((endTime - startTime) / 60000); // Duration in minutes
+    return Math.round((endTime - startTime) / 60000); 
   };
 
   return (

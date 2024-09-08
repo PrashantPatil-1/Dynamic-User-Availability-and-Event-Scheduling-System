@@ -1,9 +1,7 @@
-///frontend/components/AvailabilityForm.jsx
-
 import React, { useState } from "react";
 import axios from "axios";
 
-function ScheduleSessionForm({ availability, sessions: initialSessions }) {
+function ScheduleSessionForm({ availability, sessions: initialSessions, setAvailability }) {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [type, setType] = useState("One-on-One");
   const [attendees, setAttendees] = useState([{ name: "", email: "" }]);
@@ -59,6 +57,9 @@ function ScheduleSessionForm({ availability, sessions: initialSessions }) {
       setAvailability(prev => prev.map(slot =>
         slot.start === selectedSlot.start ? { ...slot, booked: true } : slot
       ));
+
+      // Reset attendees for the next session
+      setAttendees([{ name: "", email: "" }]);
     } catch (error) {
       console.error("Error scheduling session:", error.response ? error.response.data : error.message);
     }
@@ -145,16 +146,32 @@ function ScheduleSessionForm({ availability, sessions: initialSessions }) {
       {sessions.length === 0 ? (
         <p>No sessions scheduled.</p>
       ) : (
-        <ul>
-          {sessions.map((session) => (
-            <li key={session.sessionId}>
-              {new Date(session.scheduledTime).toLocaleString()} - {session.sessionType} with {session.participants.join(', ')}
-              <button onClick={() => deleteSession(session.sessionId)} style={{ marginLeft: '10px', color: 'red' }}>
-                Delete
-              </button>
-            </li>
-          ))}
-        </ul>
+        <table className="table table-striped">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Session Type</th>
+              <th>Participants</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {sessions.map((session) => (
+              <tr key={session.sessionId}>
+                <td>{new Date(session.scheduledTime).toLocaleDateString()}</td>
+                <td>{new Date(session.scheduledTime).toLocaleTimeString()}</td>
+                <td>{session.sessionType}</td>
+                <td>{session.participants.join(', ')}</td>
+                <td>
+                  <button onClick={() => deleteSession(session.sessionId)} style={{ color: 'red' }}>
+                    Delete
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );
