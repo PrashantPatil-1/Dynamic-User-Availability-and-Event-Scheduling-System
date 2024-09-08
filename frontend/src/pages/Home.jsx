@@ -63,7 +63,12 @@ function Home() {
     }
   };
 
-  const updateAvailability = async (slotId) => {
+  const updateAvailability = async (slotId, booked) => {
+    if (booked) {
+      alert("Call to admin for modify.");
+      return;
+    }
+
     if (!date || !startTime || !endTime) {
       alert("Please select a date, start time, and end time before updating.");
       return;
@@ -89,7 +94,12 @@ function Home() {
     }
   };
 
-  const deleteAvailability = async (slotId) => {
+  const deleteAvailability = async (slotId, booked) => {
+    if (booked) {
+      alert("Call to admin for modify.");
+      return;
+    }
+
     try {
       await axios.delete(`http://localhost:3000/api/availability/${slotId}`);
       setAvailability((prev) => prev.filter((slot) => slot._id !== slotId));
@@ -142,11 +152,6 @@ function Home() {
                 id="date"
                 value={date.toISOString().split("T")[0]}
                 onChange={(e) => setDate(new Date(e.target.value))}
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  boxSizing: "border-box",
-                }}
               />
             </div>
             <div style={{ marginBottom: "20px" }}>
@@ -156,11 +161,6 @@ function Home() {
                 id="startTime"
                 value={startTime}
                 onChange={(e) => setStartTime(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  boxSizing: "border-box",
-                }}
               />
             </div>
             <div style={{ marginBottom: "20px" }}>
@@ -170,83 +170,87 @@ function Home() {
                 id="endTime"
                 value={endTime}
                 onChange={(e) => setEndTime(e.target.value)}
-                style={{
-                  width: "100%",
-                  padding: "8px",
-                  boxSizing: "border-box",
-                }}
               />
             </div>
-            <button
-              onClick={
-                selectedSlot
-                  ? () => updateAvailability(selectedSlot._id)
-                  : saveAvailability
-              }
-              style={{
-                padding: "10px 20px",
-                backgroundColor: "#007bff",
-                color: "#fff",
-                border: "none",
-                borderRadius: "4px",
-              }}
-            >
-              {selectedSlot ? "Update Availability" : "Save Availability"}
-            </button>
-            <div style={{ marginTop: "20px" }}>
-              <h3>Existing Availability</h3>
-              <ul>
-                {availability && availability.length > 0 ? (
-                  availability.map((slot, index) => (
-                    <li key={index}>
-                      {new Date(slot.start).toLocaleString()} -{" "}
-                      {new Date(slot.end).toLocaleString()} ({slot.duration}{" "}
-                      minutes)
-                      {slot.booked ? (
-                        <span style={{ color: "red", marginLeft: "10px" }}>
-                          Booked{" "}
-                        </span>
-                      ) : (
-                        <span style={{ color: "green", marginLeft: "10px" }}>
-                          Available
-                        </span>
-                      )}
-                      <button
-                        onClick={() => {
-                          setSelectedSlot(slot);
-                          setStartTime(
-                            new Date(slot.start)
-                              .toISOString()
-                              .split("T")[1]
-                              .substring(0, 5)
-                          );
-                          setEndTime(
-                            new Date(slot.end)
-                              .toISOString()
-                              .split("T")[1]
-                              .substring(0, 5)
-                          );
-                        }}
-                        style={{ marginLeft: "10px" }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => deleteAvailability(slot._id)}
-                        style={{ marginLeft: "10px", color: "red" }}
-                      >
-                        Delete
-                      </button>
-                    </li>
-                  ))
-                ) : (
-                  <li>No availability slots available.</li>
-                )}
-              </ul>
-            </div>
+            {selectedSlot ? (
+              <button onClick={() => updateAvailability(selectedSlot._id, selectedSlot.booked)}>Update Slot</button>
+            ) : (
+              <button onClick={saveAvailability}>Save Availability</button>
+            )}
           </div>
         )}
       </div>
+      {user && (
+        <div
+          style={{
+            marginTop: "40px",
+            padding: "20px",
+            border: "1px solid #ddd",
+            borderRadius: "8px",
+            background: "#fff",
+          }}
+        >
+          <h2>Your Available Slots</h2>
+          <ul style={{ listStyleType: "none", paddingLeft: 0 }}>
+            {availability.map((slot) => (
+              <li
+                key={slot._id}
+                style={{
+                  padding: "10px",
+                  borderBottom: "1px solid #ddd",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <span>
+                  {new Date(slot.start).toLocaleString()} -{" "}
+                  {new Date(slot.end).toLocaleString()} ({slot.duration} minutes)
+                </span>
+                <span>
+                  {slot.booked ? (
+                    <span style={{ color: "red", marginLeft: "10px" }}>Booked</span>
+                  ) : (
+                    <span style={{ color: "green", marginLeft: "10px" }}>Available</span>
+                  )}
+                  <button
+                    onClick={() => {
+                      setSelectedSlot(slot);
+                      setStartTime(slot.start.split("T")[1].slice(0, 5));
+                      setEndTime(slot.end.split("T")[1].slice(0, 5));
+                    }}
+                    style={{
+                      marginLeft: "10px",
+                      padding: "5px",
+                      background: "orange",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => deleteAvailability(slot._id, slot.booked)}
+                    style={{
+                      marginLeft: "10px",
+                      padding: "5px",
+                      background: "red",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: "4px",
+                      cursor: "pointer",
+                    }}
+                  >
+                    Delete
+                  </button>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
   );
 }
