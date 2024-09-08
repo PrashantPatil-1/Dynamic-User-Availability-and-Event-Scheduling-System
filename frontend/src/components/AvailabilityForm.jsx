@@ -23,59 +23,54 @@ function AvailabilityForm({ user }) {
     }
   }, [user]);
 
-  const saveSlot = async () => {
-    if (!start || !end || !duration) {
-      alert("Please fill out all fields");
-      return;
-    }
-
+  const saveAvailability = async () => {
     try {
-      if (selectedSlot) {
-        if (selectedSlot.booked) {
-          alert("Call to admin for modify.");
-          return;
-        }
-        const response = await axios.put(`http://localhost:3000/api/availability/${selectedSlot._id}`, {
-          start,
-          end,
-          duration,
-        });
-        setAvailability(availability.map(slot => slot._id === selectedSlot._id ? response.data : slot));
-        setSelectedSlot(null);
-      } else {
-        const response = await axios.post("http://localhost:3000/api/availability", {
-          user: user._id,
-          start,
-          end,
-          duration,
-        });
-        setAvailability([...availability, response.data]);
-      }
+      const response = await axios.post("http://localhost:3000/api/availability", {
+        user: user._id,
+        start: new Date(start).toISOString(),
+        end: new Date(end).toISOString(),
+        duration,
+      });
+      setAvailability(prev => [...prev, response.data]);
       setStart("");
       setEnd("");
       setDuration(30);
     } catch (error) {
-      console.error("Error saving slot:", error);
+      console.error("Error saving availability:", error);
     }
   };
 
-  const deleteSlot = async (slotId, booked) => {
-    if (booked) {
-      alert("Call to admin for modify.");
-      return;
+  const updateAvailability = async (slotId) => {
+    try {
+      const response = await axios.put(`http://localhost:3000/api/availability/${slotId}`, {
+        start: new Date(start).toISOString(),
+        end: new Date(end).toISOString(),
+        duration,
+      });
+      setAvailability(prev =>
+        prev.map(slot => slot._id === slotId ? response.data : slot)
+      );
+      setStart("");
+      setEnd("");
+      setDuration(30);
+      setSelectedSlot(null);
+    } catch (error) {
+      console.error("Error updating availability:", error);
     }
+  };
 
+  const deleteAvailability = async (slotId) => {
     try {
       await axios.delete(`http://localhost:3000/api/availability/${slotId}`);
-      setAvailability(availability.filter(slot => slot._id !== slotId));
+      setAvailability(prev => prev.filter(slot => slot._id !== slotId));
     } catch (error) {
-      console.error("Error deleting slot:", error);
+      console.error("Error deleting availability:", error);
     }
   };
 
   return (
     <div>
-      <h3>Set Availability</h3>
+      <h2>Set Availability for {user.email}</h2>
       <div>
         <label>Start Time:</label>
         <input
@@ -93,34 +88,25 @@ function AvailabilityForm({ user }) {
         />
       </div>
       <div>
-        <label>Duration (minutes):</label>
+        <label>Duration (in minutes):</label>
         <input
           type="number"
           value={duration}
-          onChange={(e) => setDuration(Number(e.target.value))}
+          onChange={(e) => setDuration(e.target.value)}
+          min="5"
         />
       </div>
-      <button onClick={saveSlot}>
-        {selectedSlot ? "Update Slot" : "Save Slot"}
+      <button onClick={selectedSlot ? () => updateAvailability(selectedSlot._id) : saveAvailability}>
+        {selectedSlot ? "Update Availability" : "Save Availability"}
       </button>
       <div>
-        <h3>Your Availability</h3>
+        <h3>Existing Availability</h3>
         <ul>
-          {availability.map(slot => (
-            <li key={slot._id}>
+          {availability.map((slot, index) => (
+            <li key={index}>
               {new Date(slot.start).toLocaleString()} - {new Date(slot.end).toLocaleString()} ({slot.duration} minutes)
-              {slot.booked ? (
-                <span style={{ color: "red", marginLeft: "10px" }}>Booked</span>
-              ) : (
-                <span style={{ color: "green", marginLeft: "10px" }}>Available</span>
-              )}
-              <button onClick={() => {
-                setSelectedSlot(slot);
-                setStart(slot.start);
-                setEnd(slot.end);
-                setDuration(slot.duration);
-              }}>Edit</button>
-              <button onClick={() => deleteSlot(slot._id, slot.booked)} style={{ color: "red" }}>Delete</button>
+              <button onClick={() => { setSelectedSlot(slot); setStart(new Date(slot.start).toISOString().split('T')[0]); setEnd(new Date(slot.end).toISOString().split('T')[0]); }} style={{ marginLeft: '10px' }}>Edit</button>
+              <button onClick={() => deleteAvailability(slot._id)} style={{ marginLeft: '10px', color: 'red' }}>Delete</button>
             </li>
           ))}
         </ul>

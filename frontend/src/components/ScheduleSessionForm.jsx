@@ -1,4 +1,4 @@
-///frontend/components/ScheduleSessionForm.jsx
+///frontend/components/AvailabilityForm.jsx
 
 import React, { useState } from "react";
 import axios from "axios";
