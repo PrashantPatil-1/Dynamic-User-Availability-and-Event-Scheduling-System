@@ -1,7 +1,7 @@
-// backend/routes/sessionRoutes.js
 import express from 'express';
 import Session from '../models/Session.js';
 import Availability from '../models/Availability.js';
+// import nodemailer from 'nodemailer'; // Uncomment this line when ready to use Nodemailer
 
 const router = express.Router();
 
@@ -45,6 +45,42 @@ router.post("/", async (req, res) => {
       { user: createdBy, start: new Date(scheduledTime), duration },
       { booked: true }
     );
+
+    // Uncomment and update this section when ready to send emails
+    /*
+    const transporter = nodemailer.createTransport({
+      service: 'gmail', // Example using Gmail
+      auth: {
+        user: 'your-email@gmail.com',
+        pass: 'your-email-password',
+      },
+    });
+
+    const mailOptions = {
+      from: 'your-email@gmail.com',
+      to: participants.join(", "), // Send to all participants
+      subject: 'Session Scheduled',
+      text: `Dear Participant,
+
+      A session has been scheduled.
+
+      Date and Time: ${new Date(scheduledTime).toLocaleString()}
+      Created by: ${createdBy}
+
+      Please mark your calendar.
+
+      Best regards,
+      Your Team`,
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Error sending email:', error);
+      } else {
+        console.log('Email sent:', info.response);
+      }
+    });
+    */
 
     res.status(201).json(session);
   } catch (error) {
